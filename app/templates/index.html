@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Jarvis AI - File Summarizer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>🧠 Jarvis AI - File Summarizer & Q&A</h1>
+    <form id="upload-form">
+      <input type="file" id="file" name="file" accept=".pdf" required>
+      <button type="submit">Upload & Summarize</button>
+    </form>
+
+    <div id="summary-box" class="hidden">
+      <h2>📄 Summary</h2>
+      <p id="summary"></p>
+
+      <h3>💬 Ask a Question</h3>
+      <input type="text" id="question" placeholder="Ask something about the document...">
+      <button id="ask-btn">Ask</button>
+      <p id="answer"></p>
+    </div>
+  </div>
+
+  <script>
+    const uploadForm = document.getElementById("upload-form");
+    const summaryBox = document.getElementById("summary-box");
+    const summaryText = document.getElementById("summary");
+    const answerText = document.getElementById("answer");
+
+    uploadForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const file = document.getElementById("file").files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/summarize", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.summary) {
+        summaryBox.classList.remove("hidden");
+        summaryText.textContent = data.summary;
+      } else {
+        alert("Error: " + (data.error || "Unknown"));
+      }
+    });
+
+    document.getElementById("ask-btn").addEventListener("click", async () => {
+      const question = document.getElementById("question").value;
+      const context = document.getElementById("summary").textContent;
+      const res = await fetch("/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question, context })
+      });
+      const data = await res.json();
+      answerText.textContent = data.answer || "No answer found.";
+    });
+  </script>
+</body>
+</html>

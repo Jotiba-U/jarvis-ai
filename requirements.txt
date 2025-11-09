@@ -1,0 +1,6 @@
+flask
+requests
+PyMuPDF
+pinecone
+sentence-transformers
+python-dotenv
